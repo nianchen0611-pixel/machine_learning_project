@@ -78,20 +78,106 @@ I did not use `sklearn.cluster.KMeans` for this part. The clustering result is u
 
 The original movie embeddings are high-dimensional, so PCA is used to reduce them to two dimensions for visualization. This helps users see how movies are grouped in the embedding space.
 
-## Project Structure
+## Directory Structure
+
+- `app.py`: Streamlit entry point. It builds the web interface and connects all modules.
+- `data.py`: Loads and preprocesses the TMDB movie dataset.
+- `embed.py`: Loads the sentence-transformer model and generates movie/query embeddings.
+- `retrieval.py`: Implements cosine similarity and top-k retrieval logic.
+- `clustering.py`: Implements K-Means clustering from scratch using NumPy.
+- `utils.py`: Helper functions for shortening long text and normalizing movie titles.
+- `requirements.txt`: Lists the dependencies needed to run the project.
+- `data/`: Stores the movie dataset.
+  - `movies.csv`: TMDB movie metadata used by the app.
+
+## Installation Pipeline
+
+Follow the steps below to run this project locally.
+
+### 1. Clone this repository
+
+```bash
+git clone https://github.com/nianchen0611-pixel/machine_learning_project.git
+cd machine_learning_project
+```
+
+### 2. Create a virtual environment
+
+On macOS or Linux:
+
+```bash
+python3 -m venv .venv
+```
+
+On Windows:
+
+```bash
+python -m venv .venv
+```
+
+### 3. Activate the virtual environment
+
+On macOS or Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+On Windows PowerShell:
+
+```bash
+.venv\Scripts\Activate.ps1
+```
+
+On Windows Command Prompt:
+
+```bash
+.venv\Scripts\activate.bat
+```
+
+### 4. Install the required dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Confirm the dataset is included
+
+The dataset is already included in the repository:
 
 ```text
-movie_finder/
-│
-├── app.py
-├── data.py
-├── embed.py
-├── retrieval.py
-├── clustering.py
-├── utils.py
-├── requirements.txt
-├── README.md
-├── .gitignore
-│
-└── data/
-    └── movies.csv
+data/movies.csv
+```
+
+No extra dataset download is required.
+
+### 6. Run the Streamlit application
+
+```bash
+streamlit run app.py
+```
+
+If this command does not work, try:
+
+```bash
+python3 -m streamlit run app.py
+```
+
+On Windows, you can also try:
+
+```bash
+python -m streamlit run app.py
+```
+
+### 7. Open the app in your browser
+
+After running the command, Streamlit should automatically open the app. If it does not open automatically, copy and paste this address into your browser:
+
+```text
+http://localhost:8501
+```
+
+### Note
+
+The first run may take a few minutes because the sentence-transformer model needs to be downloaded and the movie embeddings need to be computed. After the first run, the app should load faster because Streamlit caches the model and embedding results.
+

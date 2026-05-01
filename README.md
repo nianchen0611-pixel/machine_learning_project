@@ -179,5 +179,5 @@ http://localhost:8501
 
 ### Note
 
-The first run may take a few minutes because the sentence-transformer model needs to be downloaded and the movie embeddings need to be computed. After the first run, the app should load faster because Streamlit caches the model and embedding results.
+The first run may take a few minutes because the sentence-transformer model needs to be downloaded and the movie embeddings need to be computed. The dataset is already included in `data/movies.csv`, so no extra dataset download is required. After the first run, the app should load faster because Streamlit caches the model and embedding results.
 

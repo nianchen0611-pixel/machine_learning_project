@@ -3,21 +3,22 @@ import numpy as np
 import streamlit as st
 
 
-# Streamlit 的缓存功能，不用每次都重复计算 embeddings
+# Caching feature, avoid recomputing embeddings every time.
 @st.cache_resource
-# pretrained sentence-transformer model，专门用来把文本转换成embedding vector的模型
 def load_embedding_model():
+    # Pretrained sentence-transformer model
     return SentenceTransformer("all-MiniLM-L6-v2")
 
 
-# 直接使用缓存里的模型 cached model，速度快很多
+# Directly use cached model, much faster
 @st.cache_data
 def compute_movie_embeddings(texts):
+    # Convert all movie search texts into embedding vectors.
     model = load_embedding_model()
     embeddings = model.encode(texts, show_progress_bar=False)
     return np.array(embeddings)
 
-
+# Convert the user's search query into one embedding vector.
 def compute_query_embedding(query):
     model = load_embedding_model()
     embedding = model.encode([query], show_progress_bar=False)

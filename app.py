@@ -56,21 +56,20 @@ if "similar_indices" not in st.session_state:
 if "similar_scores" not in st.session_state:
     st.session_state.similar_scores = None
 
-
+# Makes the input box and recommendation results return to an empty state.
 def clear_movie_search():
-    """
-    Clear the main natural language movie search section.
-    """
+    
+    # Clear all stored results from the main natural language search section.
     st.session_state.movie_search_active = False
     st.session_state.movie_query_input = ""
     st.session_state.movie_top_indices = None
     st.session_state.movie_top_scores = None
 
 
+# Removes the matched movie, similar movie results, and the input title.
 def clear_similar_search():
-    """
-    Clear the similar movie search section.
-    """
+    
+    # Clear all stored results from the similar movie search section.
     st.session_state.similar_search_active = False
     st.session_state.similar_title_input = ""
     st.session_state.similar_selected_idx = None
@@ -87,9 +86,12 @@ k_clusters = 5
 with st.spinner("Loading movie data..."):
     movies = load_movies("data/movies.csv", max_rows=max_rows)
 
+# Use SentenceTransformer model to convert each movie's text into an embedding vector.
 with st.spinner("Computing movie embeddings..."):
+    # total number of movie vectors is saved 
     movie_embeddings = compute_movie_embeddings(movies["search_text"].tolist())
 
+# Pass all movie_embeddings, info of all movies in vector, into k-means, and then group them with similar semantics into the same group.
 with st.spinner("Running K-Means clustering from scratch..."):
     cluster_labels, centroids = kmeans_from_scratch(
         movie_embeddings,
@@ -101,12 +103,14 @@ with st.spinner("Running K-Means clustering from scratch..."):
 movies["cluster"] = cluster_labels
 
 
-# =========================
+
 # Main natural language search
 # =========================
 
 st.subheader("🔎 Search for Movies: ")
 
+
+# User text-input box
 query = st.text_input(
     "Describe the movie you want to search:",
     placeholder="Example: a science fiction movie about dreams",
@@ -115,9 +119,12 @@ query = st.text_input(
 
 col_search, col_space, col_clear_search = st.columns([1.2, 7.2, 0.9])
 
+
+# Start button
 with col_search:
     search_clicked = st.button("Search Movies")
 
+# Clear button
 with col_clear_search:
     st.button(
         "✕ Clear Results",
@@ -161,7 +168,7 @@ if search_clicked:
             # Rerun so the Clear button immediately becomes clickable
             st.rerun()
 
-
+# Movie search result display
 if st.session_state.movie_search_active:
     st.subheader("Top Movie Recommendations:")
 
@@ -190,7 +197,7 @@ if st.session_state.movie_search_active:
             st.write(f"**Overview:** {shorten_text(movie['overview'])}")
 
 
-# =========================
+
 # Similar movie search by title
 # =========================
 
@@ -204,9 +211,11 @@ movie_title_input = st.text_input(
 
 col_find, col_space, col_clear_similar = st.columns([1.2, 7.2, 0.9])
 
+# Start button
 with col_find:
     find_similar_clicked = st.button("Find Similar Movies")
 
+# Clear button
 with col_clear_similar:
     st.button(
         "✕ Clear Results",
@@ -218,7 +227,7 @@ with col_clear_similar:
 
 
 if find_similar_clicked:
-    
+
     # Clear previous similar movie results first
     st.session_state.similar_search_active = False
     st.session_state.similar_selected_idx = None
@@ -232,43 +241,49 @@ if find_similar_clicked:
         # Normalize user input
         normalized_input = normalize_title(movie_title_input)
 
-        # Create a normalized title column for flexible matching
-        movies["normalized_title"] = movies["title"].apply(normalize_title)
-
-        # First try exact matching after normalization
-        exact_matches = movies[movies["normalized_title"] == normalized_input]
-
-        # If exact match exists, use it first
-        if not exact_matches.empty:
-            matched_movies = exact_matches
-
-        # If no exact match, then try partial matching
-        else:
-            matched_movies = movies[
-                movies["normalized_title"].str.contains(normalized_input, na=False)
-            ]
-
-        if matched_movies.empty:
-            st.warning("No matching movie title found. Try another title.")
+        # If the input only contains symbols or punctuation, normalization becomes empty.
+        # Example: "!!!!!!" -> ""
+        if normalized_input == "":
+            st.warning("Please enter a valid movie title.")
 
         else:
-            # Use the best matched movie
-            selected_idx = matched_movies.index[0]
-            selected_vector = movie_embeddings[selected_idx]
+            # Create a normalized title column for flexible matching
+            movies["normalized_title"] = movies["title"].apply(normalize_title)
 
-            # Compare the selected movie with all other movies
-            scores = cosine_similarity(selected_vector, movie_embeddings)
+            # First try exact matching after normalization
+            exact_matches = movies[movies["normalized_title"] == normalized_input]
 
-            # Skip the first result because it is the selected movie itself
-            similar_indices = scores.argsort()[::-1][1:6]
+            # If exact match exists, use it first
+            if not exact_matches.empty:
+                matched_movies = exact_matches
 
-            st.session_state.similar_search_active = True
-            st.session_state.similar_selected_idx = selected_idx
-            st.session_state.similar_indices = similar_indices
-            st.session_state.similar_scores = scores
+            # If no exact match, then try partial matching
+            else:
+                matched_movies = movies[
+                    movies["normalized_title"].str.contains(normalized_input, na=False)
+                ]
 
-            # Rerun so the Clear button immediately becomes clickable
-            st.rerun()
+            if matched_movies.empty:
+                st.warning("No matching movie title found. Try another title.")
+
+            else:
+                # Use the best matched movie
+                selected_idx = matched_movies.index[0]
+                selected_vector = movie_embeddings[selected_idx]
+
+                # Compare the selected movie with all other movies
+                scores = cosine_similarity(selected_vector, movie_embeddings)
+
+                # Skip the first result because it is the selected movie itself
+                similar_indices = scores.argsort()[::-1][1:top_k + 1]
+
+                st.session_state.similar_search_active = True
+                st.session_state.similar_selected_idx = selected_idx
+                st.session_state.similar_indices = similar_indices
+                st.session_state.similar_scores = scores
+
+                # Rerun so the Clear button immediately becomes clickable
+                st.rerun()
 
 
 if st.session_state.similar_search_active:
@@ -300,11 +315,12 @@ if st.session_state.similar_search_active:
             st.write(f"**Overview:** {shorten_text(movie['overview'], 250)}")
 
 
-# =========================
+
 # Visualization
 # =========================
 
 st.subheader("📊 Movie Embedding Visualization")
+st.caption("K-Means clustering is implemented from scratch and used to color the movie embedding visualization.")
 
 if st.checkbox("Show 2D cluster visualization"):
     with st.spinner("Reducing embeddings to 2D using PCA..."):
@@ -331,7 +347,7 @@ if st.checkbox("Show 2D cluster visualization"):
     st.plotly_chart(fig, use_container_width=True)
 
 
-# =========================
+
 # Explanation
 # =========================
 

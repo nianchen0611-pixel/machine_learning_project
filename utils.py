@@ -16,7 +16,8 @@ def normalize_title(title):
     Example:
     "Spider-Man" -> "spiderman"
     "spider man" -> "spiderman"
-    "SPIDER MAN" -> "spiderman"
+    "The Fast and the Furious" -> "fastfurious"
+    "fast and furious" -> "fastfurious"
 
     """
     if not isinstance(title, str):

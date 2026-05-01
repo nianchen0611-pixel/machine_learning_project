@@ -6,6 +6,7 @@ Movie Detector is a Streamlit web application that helps users find movies using
 
 This project uses several machine learning concepts from class, including text embeddings, cosine similarity, nearest-neighbor retrieval, K-Means clustering, and dimensionality reduction for visualization.
 
+
 ## Problem Statement
 
 Movie platforms usually contain thousands of movies, and users may not always know the exact title they want to search for. Sometimes, users only know the mood, genre, or story idea they are interested in. Traditional keyword search may fail when the user's wording does not exactly match the movie description.
@@ -59,13 +60,13 @@ Each movie is represented by a text field that combines its title, overview, gen
 
 After converting the user query into an embedding, the app computes cosine similarity between the query vector and all movie vectors. Movies with higher similarity scores are considered more relevant to the user's input.
 
-The cosine similarity and top-k retrieval logic are implemented in `retrieval.py`.
+The cosine similarity and top-k retrieval logic are manually implemented in `retrieval.py`. Instead of using a built-in cosine similarity function from scikit-learn, the project calculates cosine similarity using the dot product and vector norms.
 
 ### K-Means Clustering from Scratch
 
-To satisfy the course requirement that at least one course algorithm must be implemented from scratch, I implemented K-Means clustering manually in `clustering.py`.
+To satisfy the course requirement that at least one course algorithm must be implemented from scratch, K-Means clustering is implemented manually in `clustering.py`.
 
-Our K-Means implementation includes:
+K-Means implementation includes:
 
 - Random centroid initialization
 - Assigning each movie embedding to the nearest centroid
@@ -77,6 +78,11 @@ I did not use `sklearn.cluster.KMeans` for this part. The clustering result is u
 ### PCA Visualization
 
 The original movie embeddings are high-dimensional, so PCA is used to reduce them to two dimensions for visualization. This helps users see how movies are grouped in the embedding space.
+
+## Limitations
+
+- The app ranks movies by semantic similarity instead of strict genre filtering, so some recommended movies may not exactly match every genre word in the query.
+- The recommendation quality depends on the movie metadata in the dataset, especially the overview, genres, and keywords.
 
 ## Directory Structure
 
@@ -176,6 +182,22 @@ After running the command, Streamlit should automatically open the app. If it do
 ```text
 http://localhost:8501
 ```
+
+## Example Search Queries
+
+For natural language movie search, try:
+- a science fiction movie about dreams and reality
+- a superhero movie with action and adventure
+- a romantic movie about love and sacrifice
+- a scary horror movie about ghosts
+- an emotional drama about friendship and personal growth
+
+For similar movie search by title, try:
+- spider man
+- fast and furious
+- inception
+- titanic
+- bat man
 
 ### Note
 

@@ -9,7 +9,6 @@ from retrieval import top_k_search, cosine_similarity
 from clustering import kmeans_from_scratch
 from utils import shorten_text, normalize_title
 
-#python3 -m streamlit run app.py
 
 
 st.set_page_config(
